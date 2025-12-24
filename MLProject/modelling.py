@@ -8,7 +8,7 @@ from pathlib import Path
 
 def train():
     # Load Data
-    BASE_DIR = Path(__file__).resolve().parent.parent
+    BASE_DIR = Path(__file__).resolve().parent
 
     train_path = BASE_DIR / "student_performance_preprocessing" / "train.csv"
     test_path  = BASE_DIR / "student_performance_preprocessing" / "test.csv"
