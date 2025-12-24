@@ -41,8 +41,8 @@ jobs:
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       run: |
         cd MLProject
-        
-        mlflow run . --env-manager=local
+
+        mlflow run . --env-manager=local --experiment-name CI_Experiment
         
         if [ -f "run_id.txt" ]; then
           RUN_ID=$(cat run_id.txt)

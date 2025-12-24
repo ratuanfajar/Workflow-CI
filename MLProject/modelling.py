@@ -23,7 +23,7 @@ def train():
     y_test = test_df['final_grade']
 
     # Setup MLflow
-    mlflow.set_tracking_uri("file:./mlruns")
+    # mlflow.set_tracking_uri("file:./mlruns")
     mlflow.set_experiment("CI_Experiment")
     
     # Aktifkan Autolog
