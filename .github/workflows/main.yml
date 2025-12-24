@@ -72,8 +72,7 @@ jobs:
         cd MLProject
         mlflow models build-docker \
           -m "runs:/$RUN_ID/model" \
-          -n "${{ secrets.DOCKER_USERNAME }}/workflow-ci:latest" \
-          --enable-mlserver
+          -n "${{ secrets.DOCKER_USERNAME }}/workflow-ci:latest" 
 
     # Push ke Docker Hub 
     - name: Push Docker Image
