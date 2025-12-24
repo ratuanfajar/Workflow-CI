@@ -52,7 +52,14 @@ def train():
         mlflow.sklearn.log_model(clf, "model")
 
         # Print Run ID agar bisa ditangkap oleh GitHub Actions
-        print(f"::set-output name=run_id::{run.info.run_id}")
+        run_id = run.info.run_id
+        print(f"Run ID: {run_id}")
+        
+        # Simpan ke file run_id.txt di folder yang sama
+        with open("run_id.txt", "w") as f:
+            f.write(run_id)
+        
+        print("Run ID berhasil disimpan ke run_id.txt")
 
     print("Selesai! Cek folder 'mlruns' untuk hasil tracking lokal.")
 
