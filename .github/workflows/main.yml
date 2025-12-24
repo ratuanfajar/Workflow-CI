@@ -9,77 +9,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Ambil Kode
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Setup Python
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12.7'
 
-    # Install MLflow & Dependencies
     - name: Install dependencies
       run: |
         pip install mlflow==2.19.0 pandas scikit-learn numpy virtualenv seaborn matplotlib
 
-    # Login ke Docker Hub
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Jalankan MLProject 
     - name: Run MLflow Project
       id: run_mlflow
       env:
-        # Masukkan Credentials DagsHub/MLflow agar tracking aman
         MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       run: |
         cd MLProject
-
+        
+        # Jalankan dengan experiment name yang konsisten
         mlflow run . --env-manager=local --experiment-name CI_Experiment
         
+        # Logika mencari Run ID
         if [ -f "run_id.txt" ]; then
           RUN_ID=$(cat run_id.txt)
-          echo "Found Run ID from file: $RUN_ID"
         else
-          echo "run_id.txt not found. Searching in mlruns folder..."
-          # Cari folder terbaru di DALAM subfolder apapun di mlruns (mlruns/0/xxx atau mlruns/1/xxx)
-          # ls -td mengurutkan berdasarkan waktu (terbaru diatas)
+          # Fallback: Cari run terakhir dari mlruns lokal (biasanya meta data tersisa di sini)
+          # Atau kita paksa ambil dari output mlflow run jika memungkinkan, tapi cara ini paling aman utk skrg
           RUN_ID=$(ls -td mlruns/*/*/ | head -1 | xargs basename)
-          echo "Fallback found Run ID: $RUN_ID"
         fi
         
-        # Cek apakah RUN_ID masih kosong
-        if [ -z "$RUN_ID" ]; then
-          echo "ERROR: Could not determine Run ID."
-          exit 1
-        fi
-        
-        # Simpan ke Environment Github Actions
+        echo "Found Run ID: $RUN_ID"
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-    # Simpan Artefak ke GitHub 
-    - name: Upload MLflow Runs
-      uses: actions/upload-artifact@v4
-      with:
-        name: mlflow-runs
-        path: MLProject/mlruns/
-
-    # Build Docker Image 
     - name: Build Docker Image using MLflow
+      env:
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+        MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
       run: |
         cd MLProject
+        echo "Building Docker for Run ID: $RUN_ID from Remote Tracking Server..."
+        
         mlflow models build-docker \
           -m "runs:/$RUN_ID/model" \
-          -n "${{ secrets.DOCKER_USERNAME }}/workflow-ci:latest" 
+          -n "${{ secrets.DOCKER_USERNAME }}/workflow-ci:latest"
 
-    # Push ke Docker Hub 
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/workflow-ci:latest
