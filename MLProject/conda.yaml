@@ -1,0 +1,15 @@
+name: student-grade-env
+channels:
+  - defaults
+dependencies:
+  - python=3.12.7
+  - pip
+  - pip:
+    - mlflow=2.19.0
+    - pandas
+    - scikit-learn
+    - numpy
+    - dagshub
+    - matplotlib
+    - numpy
+    - seaborn
