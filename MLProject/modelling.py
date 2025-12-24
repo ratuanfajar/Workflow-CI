@@ -10,8 +10,8 @@ def train():
     # Load Data
     BASE_DIR = Path(__file__).resolve().parent.parent
 
-    train_path = BASE_DIR / "Membangun_model" / "student_performance_preprocessing" / "train.csv"
-    test_path  = BASE_DIR / "Membangun_model" / "student_performance_preprocessing" / "test.csv"
+    train_path = BASE_DIR / "student_performance_preprocessing" / "train.csv"
+    test_path  = BASE_DIR / "student_performance_preprocessing" / "test.csv"
 
     print("Loading Data...")
     train_df = pd.read_csv(train_path)
